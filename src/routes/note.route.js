@@ -1,6 +1,5 @@
 const noteRouter = require("express").Router();
 const Note = require("../models/notes")
-// const User = require("../models/user")
 const { userExtractor } = require("../utils/middleware")
 
 noteRouter.get("/", userExtractor, async (req, res) => {
@@ -21,15 +20,13 @@ noteRouter.get("/", userExtractor, async (req, res) => {
 noteRouter.get("/:id", userExtractor, async (req, res) => {
     const id = req.params.id
     const user = req.user
+
     try {
         const selectedNote = await Note.find({_id:id, user}).populate('user', {firstName: 1, lastName: 1, email: 1});
-        // In cases where tested with a note id not existing, it still goes ahead to the catch error block to return code 500. Why is it escaping the 404?
-        console.log(selectedNote)
-        if (!(selectedNote instanceof Array)) {
+        if (!selectedNote.length) {
             return res.status(404).json({error: `No note with id ${id} is found for this user!`})
         }
         res.status(200).json({ note: selectedNote, message: "Note retrieved successfully!" })
-        // console.log(selectedNote)
         } catch (error) {
         res.status(500).json({error: "Internal server error"})
     }
@@ -41,6 +38,7 @@ noteRouter.post("/", userExtractor, async (req, res) => {
     if(!title || !content ) {
         return res.status(400).json({error:"One or both of the required fields are missing."})
     }
+    //403 error skipped when incorrect token or no token is provided for a user. Something to be corrected in userExtractor? Seem not needed as unregistered user can't login to even attempt creating a note, right?
 
     if(!user) {
         return res.status(403).json({error: "Unauthorized request."})
@@ -56,23 +54,19 @@ noteRouter.post("/", userExtractor, async (req, res) => {
     }
 })
 
-//I do not get the update endpoint to work yet.
 noteRouter.patch("/:id", userExtractor, async (req, res) => {
     const updates = req.body
     const id = req.params.id
     const user = req.user
 
-    if(!user) {
-        return res.status(403).json({error: "Unauthorized request."})
-    }
-    
     try {
-        const updatedNote = await Note.find({_id:id, user}).updateOne( updates, {isDeleted: true});
-        console.log(updatedNote)
-        if (!updatedNote.length) {
+        const updatedNote = await Note.findOneAndUpdate({_id:id, user}, updates, {isDeleted: true});
+        // console.log(updatedNote)
+        if (!updatedNote) {
             return res.status(404).json({error: `No note with id ${id} is found for this user!`})
         }
-        res.status(200).json({note: updatedNote, message: "Existing note updated successfully!"})
+        const updatedInstance = await Note.find({_id:id, user})
+        res.status(200).json({note: updatedInstance, message: "Note has been updated successfully!"})
     } catch (error) {
         console.log(error)
         res.status(500).json({error: "Internal server error"})
@@ -83,11 +77,6 @@ noteRouter.delete("/:id", userExtractor, async (req, res) => {
     const id = req.params.id
     const user = req.user
 
-    // No check to prevent a user from deleting someone else's note
-    // if(!user.notes.include(id)) {
-    //     return res.status(403).json({error: "Unauthorized request."})
-    // }
-    
     try {
         const deletedNote = await Note.findOneAndDelete({user, _id:id})
         console.log(deletedNote)
