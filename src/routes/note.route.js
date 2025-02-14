@@ -28,6 +28,7 @@ noteRouter.get("/:id", userExtractor, async (req, res) => {
         }
         res.status(200).json({ note: selectedNote, message: "Note retrieved successfully!" })
         } catch (error) {
+            console.log(error.message)
         res.status(500).json({error: "Internal server error"})
     }
 })
@@ -83,7 +84,7 @@ noteRouter.delete("/:id", userExtractor, async (req, res) => {
         if (!deletedNote) {
             return res.status(404).json({message: "Note does not exist."})
         }
-        res.status(200).json({message: "Note deleted Successfully!"})
+        res.status(204).json({message: "Note deleted Successfully!"})
     } catch (error) {
         console.log(error)
         res.status(500).json({error: "Internal server error"})

@@ -1,4 +1,5 @@
 const express = require('express')
+require('express-async-errors')
 const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -16,7 +17,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"))
 app.use(middleware.tokenExtractor)
-// app.use(middleware.userExtractor)
+app.use(middleware.errorHandler)
 
 app.use("/api/users", userRouter)
 
