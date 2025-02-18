@@ -13,7 +13,7 @@ loginRouter.post("/", async (req, res) => {
     if (!(user && passwordCheck)) {
         return res.status(401).json({error: "Invalid password!"})
     }
-    const userDetails = { email:user.email, id: user._id }
+    const userDetails = { email:user.email, id: user._id, firstName:user.firstName }
     const token = jwt.sign(userDetails, config.CRYPTO_KEY, {})
     res.status(200).json({token: token, message: "Login successfully!"})
 })
