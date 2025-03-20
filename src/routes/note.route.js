@@ -11,7 +11,7 @@ noteRouter.get("/", userExtractor, async (req, res) => {
         if (!userNotes.length) {
             return res.status(404).json({ message: "No notes are found for this user" });
         }
-        res.status(200).json({ notes: userNotes, message: "Notes retrieved successfully!" })
+        res.status(200).json({ notes: userNotes.sort({updatedAt: -1}), message: "Notes retrieved successfully!" })
     } catch(error) {
         res.status(500).json({error: error, message:"Unable to connect to the server, please try again in a few minutes."})
     }
