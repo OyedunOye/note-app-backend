@@ -5,7 +5,6 @@ const bcrypt = require('bcrypt')
 const config = require('../utils/config')
 
 
-
 loginRouter.post("/", async (req, res) => {
     const { email, password } = req.body
     const user = await User.findOne({email})
@@ -14,8 +13,7 @@ loginRouter.post("/", async (req, res) => {
         return res.status(401).json({error: "Invalid password!"})
     }
     const userDetails = { email:user.email, id: user._id, firstName:user.firstName }
-    const token = jwt.sign(userDetails, config.CRYPTO_KEY, {})
+    const token = jwt.sign(userDetails, config.CRYPTO_KEY, {expiresIn: '1d'})
     res.status(200).json({token: token, message: "Login successfully!"})
 })
-
 module.exports = loginRouter
