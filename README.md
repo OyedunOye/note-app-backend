@@ -110,3 +110,7 @@ Start the server
 ```bash
   npm start
 ```
+
+## Tech Stack
+**Server:** Node, Express
+**Database:** MongoDB
